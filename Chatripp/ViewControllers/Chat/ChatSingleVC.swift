@@ -75,10 +75,8 @@ class ChatSingleVC: UIViewController {
 			
 			self.tableCells.removeAllObjects()
 			for message in self.messages {
-				let cellIdentifier = "ChatSingleMessageCell"
-				let chatCell = ChatSingleMessageCell(style: UITableViewCell.CellStyle.default, reuseIdentifier: cellIdentifier)
-				chatCell.setMessage(message as! PFObject)
-				self.tableCells.add(chatCell)
+				let cell = ChatSingleMessageCell.create(message as? PFObject)
+				self.tableCells.add(cell)
 			}
 			
 			self.tableView.reloadData()
@@ -92,17 +90,18 @@ class ChatSingleVC: UIViewController {
 
 extension ChatSingleVC : UITableViewDataSource, UITableViewDelegate {
 	
+	func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+		let cell = self.tableCells![indexPath.row] as! ChatSingleMessageCell
+		print(cell.height())
+		return cell.height()
+	}
+	
 	func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
 		return self.tableCells.count
 	}
 	
 	func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
 		return self.tableCells![indexPath.row] as! UITableViewCell
-	}
-	
-	func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-		let cell = self.tableCells![indexPath.row] as! ChatSingleMessageCell
-		return cell.height()
 	}
 	
 	func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -120,6 +119,9 @@ extension ChatSingleVC : UITextFieldDelegate {
 				}
 				
 				self.messages = MessageManager.sharedInstance()?.messages(user: self.friend)
+				
+				let cell = ChatSingleMessageCell.create(self.messages!.lastObject as? PFObject)
+				self.tableCells.add(cell)
 				
 				self.tableView.reloadData()
 			})
