@@ -1,0 +1,6 @@
+framework module Pods_Chatripp {
+  umbrella header "Pods-Chatripp-umbrella.h"
+
+  export *
+  module * { export * }
+}

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14460.31" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="UrK-ad-SYs">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14460.20"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--View Controller-->
+        <scene sceneID="qsz-Q1-CCk">
+            <objects>
+                <viewController id="UrK-ad-SYs" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="23C-Yn-mAO">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="login_topcorner" translatesAutoresizingMaskIntoConstraints="NO" id="1Cg-74-oXu">
+                                <rect key="frame" x="200" y="0.0" width="175" height="244"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="175" id="IKm-al-C5V"/>
+                                    <constraint firstAttribute="height" constant="244" id="Nqe-QJ-aGr"/>
+                                </constraints>
+                            </imageView>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="login_bottomcorner" translatesAutoresizingMaskIntoConstraints="NO" id="UMY-7x-c5J">
+                                <rect key="frame" x="0.0" y="566" width="115" height="101"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="101" id="DDO-T0-otD"/>
+                                    <constraint firstAttribute="width" constant="115" id="qK0-ji-K5p"/>
+                                </constraints>
+                            </imageView>
+                        </subviews>
+                        <color key="backgroundColor" red="0.20392156859999999" green="0.1450980392" blue="0.65490196079999996" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <constraints>
+                            <constraint firstItem="1Cg-74-oXu" firstAttribute="trailing" secondItem="8t9-kW-Ft9" secondAttribute="trailing" id="A80-nB-Hpc"/>
+                            <constraint firstAttribute="bottom" secondItem="UMY-7x-c5J" secondAttribute="bottom" id="G1n-IE-e5g"/>
+                            <constraint firstItem="1Cg-74-oXu" firstAttribute="top" secondItem="23C-Yn-mAO" secondAttribute="top" id="kRQ-Bn-R8A"/>
+                            <constraint firstItem="UMY-7x-c5J" firstAttribute="leading" secondItem="8t9-kW-Ft9" secondAttribute="leading" id="m5r-Un-O55"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="8t9-kW-Ft9"/>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Dp9-dI-sH4" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="132" y="131.52709359605913"/>
+        </scene>
+    </scenes>
+    <resources>
+        <image name="login_bottomcorner" width="256" height="222"/>
+        <image name="login_topcorner" width="378" height="528"/>
+    </resources>
+</document>

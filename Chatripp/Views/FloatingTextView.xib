@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14460.31" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14460.20"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <customFonts key="customFonts">
+        <array key="HVD Fonts - BrandonText-Black.otf">
+            <string>BrandonText-Black</string>
+        </array>
+    </customFonts>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="FloatingTextView" customModule="Chatripp" customModuleProvider="target">
+            <connections>
+                <outlet property="contentView" destination="iN0-l3-epB" id="veb-Dg-bJX"/>
+                <outlet property="lblTitle" destination="ETN-Pi-caH" id="yiy-wS-yRk"/>
+                <outlet property="txtInput" destination="vpe-vN-Xxd" id="4pg-Fw-upR"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view contentMode="scaleToFill" id="iN0-l3-epB">
+            <rect key="frame" x="0.0" y="0.0" width="304" height="70"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="epD-iw-eFO">
+                    <rect key="frame" x="10" y="29" width="284" height="35"/>
+                    <subviews>
+                        <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="vpe-vN-Xxd">
+                            <rect key="frame" x="0.0" y="5.5" width="284" height="24"/>
+                            <color key="textColor" red="1" green="0.396078431372549" blue="0.49411764705882355" alpha="1" colorSpace="calibratedRGB"/>
+                            <fontDescription key="fontDescription" name="BrandonText-Black" family="Brandon Text" pointSize="17"/>
+                            <textInputTraits key="textInputTraits"/>
+                            <connections>
+                                <action selector="didTextEditingChanged:" destination="-1" eventType="editingChanged" id="9Nl-ze-BRW"/>
+                            </connections>
+                        </textField>
+                    </subviews>
+                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="35" id="6XN-Mf-nKO"/>
+                        <constraint firstAttribute="trailing" secondItem="vpe-vN-Xxd" secondAttribute="trailing" id="72A-PH-vaF"/>
+                        <constraint firstItem="vpe-vN-Xxd" firstAttribute="leading" secondItem="epD-iw-eFO" secondAttribute="leading" id="AKh-x6-2go"/>
+                        <constraint firstItem="vpe-vN-Xxd" firstAttribute="centerY" secondItem="epD-iw-eFO" secondAttribute="centerY" id="mNb-sX-qe5"/>
+                    </constraints>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="number" keyPath="cornerRadius">
+                            <real key="value" value="3"/>
+                        </userDefinedRuntimeAttribute>
+                    </userDefinedRuntimeAttributes>
+                </view>
+                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ETN-Pi-caH">
+                    <rect key="frame" x="10" y="10" width="35.5" height="21"/>
+                    <fontDescription key="fontDescription" name="BrandonText-Black" family="Brandon Text" pointSize="15"/>
+                    <color key="textColor" red="0.1333333333" green="0.1450980392" blue="0.78039215689999997" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                    <nil key="highlightedColor"/>
+                </label>
+            </subviews>
+            <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <constraints>
+                <constraint firstItem="epD-iw-eFO" firstAttribute="leading" secondItem="vUN-kp-3ea" secondAttribute="leading" constant="10" id="3GF-g5-aYj"/>
+                <constraint firstItem="vUN-kp-3ea" firstAttribute="trailing" secondItem="epD-iw-eFO" secondAttribute="trailing" constant="10" id="HJI-9O-kRx"/>
+                <constraint firstItem="ETN-Pi-caH" firstAttribute="top" secondItem="vUN-kp-3ea" secondAttribute="top" constant="10" id="KRI-1Q-sBq"/>
+                <constraint firstItem="ETN-Pi-caH" firstAttribute="leading" secondItem="vUN-kp-3ea" secondAttribute="leading" constant="10" id="cbL-te-W45"/>
+                <constraint firstItem="vUN-kp-3ea" firstAttribute="bottom" secondItem="epD-iw-eFO" secondAttribute="bottom" constant="6" id="pLp-LY-GeE"/>
+            </constraints>
+            <nil key="simulatedTopBarMetrics"/>
+            <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
+            <viewLayoutGuide key="safeArea" id="vUN-kp-3ea"/>
+            <userDefinedRuntimeAttributes>
+                <userDefinedRuntimeAttribute type="number" keyPath="cornerRadius">
+                    <real key="value" value="0.0"/>
+                </userDefinedRuntimeAttribute>
+            </userDefinedRuntimeAttributes>
+            <point key="canvasLocation" x="153.59999999999999" y="5.3973013493253381"/>
+        </view>
+    </objects>
+</document>

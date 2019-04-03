@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>title_post_photo</key>
+	<string>Post Photo</string>
+	<key>no_trips_coming</key>
+	<string>No upcoming trips</string>
+	<key>no_trips_coming_content</key>
+	<string>You havent added any trips yet.</string>
+	<key>no_photosets_title</key>
+	<string>No photo sets created</string>
+	<key>no_photosets_content</key>
+	<string>Create a new set by the  button below.</string>
+</dict>
+</plist>
