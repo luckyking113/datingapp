@@ -9,6 +9,12 @@
 import UIKit
 import Photos
 import AVFoundation
+import Parse
+
+protocol GetPhotosVCDelegate {
+	func setImage(img: UIImage)
+	func setPhotoSet(obj: PFObject)
+}
 
 class GetPhotosVC: UIViewController {
 
@@ -25,7 +31,7 @@ class GetPhotosVC: UIViewController {
     
     @IBOutlet weak var cvImage: UICollectionView!
     
-    var addPhotoDelegate : AddPhotosVCDelegate?
+    var addPhotoDelegate : GetPhotosVCDelegate?
     
     var imageArray = [UIImage]()
     var session: AVCaptureSession?

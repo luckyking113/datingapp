@@ -10,12 +10,6 @@ import UIKit
 import Parse
 import GooglePlaces
 
-protocol AddPhotosVCDelegate {
-    
-    func setImage(img: UIImage)
-    func setPhotoSet(obj: PFObject)
-}
-
 class AddPhotosVC: UIViewController {
 
     @IBOutlet weak var imgPhoto: PFImageView!
@@ -70,9 +64,7 @@ class AddPhotosVC: UIViewController {
     }
     
     @IBAction func clickPost(_ sender: Any) {
-        
         if let imgData = self.imgPhoto.image?.pngData() {
-            
             if location.isEmpty {
                 Helper.showAlert(target: self, title: "", message: "Please input City.")
                 return
@@ -221,7 +213,7 @@ extension AddPhotosVC : GMSAutocompleteViewControllerDelegate , UITextFieldDeleg
     }
 }
 
-extension AddPhotosVC : AddPhotosVCDelegate {
+extension AddPhotosVC : GetPhotosVCDelegate {
     
     func setPhotoSet(obj: PFObject) {
         

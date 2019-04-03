@@ -13,7 +13,7 @@ class ChoosePhotosetVC: UIViewController {
 
     @IBOutlet weak var mTableView: UITableView!
     var photoSets = [PFObject]()
-    var addPhotoVCdelegate : AddPhotosVCDelegate?
+    var addPhotoVCdelegate : GetPhotosVCDelegate?
     @IBOutlet weak var viewAddNew: UIView!
     @IBOutlet weak var txtPhotoSetName: UITextField!
     

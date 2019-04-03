@@ -29,6 +29,11 @@ class MessageManager: NSObject {
 		return (senderId == PFUser.current()?.objectId)
 	}
 	
+	public static func isImage(_ message: PFObject!) -> Bool {
+		let image = message["image"]
+		return (image != nil)
+	}
+	
 	public func loadFriends(callback: @escaping ((_ error: Any?) -> Void)) {
 		self.completionHandler = callback
 		
@@ -97,7 +102,6 @@ class MessageManager: NSObject {
 	}
 	
 	func sendMessage(_ receiver:PFUser, content: String!, callback: @escaping ((_ error: Any?) -> Void)) {
-		print(receiver.objectId)
 		/// Save
 		let message = PFObject(className: "Messages")
 		message["senderId"] = PFUser.current()?.objectId
@@ -117,6 +121,37 @@ class MessageManager: NSObject {
 			
 			/// Send Push Notification
 			self.sendPush(receiver, content: content)
+			
+			DispatchQueue.main.async(execute: {
+				callback(nil)
+			})
+			
+			print("Sent message!!!")
+		}
+	}
+	
+	public func sendImage(_ receiver:PFUser, image: UIImage!, callback: @escaping ((_ error: Any?) -> Void)) {
+		let data = image.pngData()
+		let file = PFFileObject(name: "image", data: data!)
+		/// Save
+		let message = PFObject(className: "Messages")
+		message["senderId"] = PFUser.current()?.objectId
+		message["receiverId"] = receiver.objectId
+		message["image"] = file
+		message.saveInBackground { (success: Bool, error: Error?) in
+			if error != nil {
+				DispatchQueue.main.async(execute: {
+					callback(error)
+				})
+				print("Failed to send message!!!")
+				return
+			}
+			
+			let messages = self.messages?[receiver.objectId!]
+			messages?.add(message)
+			
+			/// Send Push Notification
+			self.sendPush(receiver, content: "Image")
 			
 			DispatchQueue.main.async(execute: {
 				callback(nil)

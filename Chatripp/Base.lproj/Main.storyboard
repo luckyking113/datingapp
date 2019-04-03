@@ -3039,6 +3039,9 @@
                                         </constraints>
                                         <inset key="contentEdgeInsets" minX="3" minY="3" maxX="3" maxY="3"/>
                                         <state key="normal" image="ic_camera"/>
+                                        <connections>
+                                            <action selector="onPhotoBtnClicked:" destination="09R-gH-n4l" eventType="touchUpInside" id="cSq-ZN-qRI"/>
+                                        </connections>
                                     </button>
                                 </subviews>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>

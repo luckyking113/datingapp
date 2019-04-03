@@ -12,7 +12,7 @@ class ChooseImageVC: UIViewController {
 
     var image : UIImage!
     var rotation : CGFloat = 0.0
-    var addPhotoDelegate : AddPhotosVCDelegate?
+    var addPhotoDelegate : GetPhotosVCDelegate?
     @IBOutlet weak var photoView: UIImageView!
     
     override func viewDidLoad() {
@@ -31,7 +31,7 @@ class ChooseImageVC: UIViewController {
     
     func goBackToAddPhotosVC() {
         for controller in self.navigationController!.viewControllers as Array {
-            if controller.isKind(of: AddPhotosVC.self) {
+            if controller.isKind(of: AddPhotosVC.self) || controller.isKind(of: ChatSingleVC.self) {
                 self.navigationController!.popToViewController(controller, animated: true)
                 break
             }

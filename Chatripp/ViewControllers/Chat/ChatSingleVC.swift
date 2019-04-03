@@ -33,10 +33,6 @@ class ChatSingleVC: UIViewController {
 		super.viewWillAppear(animated)
 		
 		(UIApplication.shared.delegate as? AppDelegate)?.chatSingleVC = self
-		
-		self.nameLabel.text = String(format: "%@ %@", self.profile!["first_name"] as! String, self.profile!["last_name"] as! String)
-		
-		reload()
 	}
 	
 	override func viewDidDisappear(_ animated: Bool) {
@@ -50,11 +46,19 @@ class ChatSingleVC: UIViewController {
     }
     
     func setupView() {
+		self.nameLabel.text = String(format: "%@ %@", self.profile!["first_name"] as! String, self.profile!["last_name"] as! String)
+		reload()
     }
     
     @IBAction func clickBack(_ sender: Any) {
         self.goBackVC()
     }
+	
+	@IBAction func onPhotoBtnClicked(_ sender: UIButton) {
+		let getPhotosVC = self.storyboard?.instantiateViewController(withIdentifier: "GetPhotosVC") as! GetPhotosVC
+		getPhotosVC.addPhotoDelegate = self
+		self.navigationController?.pushViewController(getPhotosVC, animated: true)
+	}
 	
 	public func load() {
 		if self.messages.count > 0 {
@@ -76,6 +80,7 @@ class ChatSingleVC: UIViewController {
 			self.tableCells.removeAllObjects()
 			for message in self.messages {
 				let cell = ChatSingleMessageCell.create(message as? PFObject)
+				cell.delegate = self
 				self.tableCells.add(cell)
 			}
 			
@@ -92,7 +97,6 @@ extension ChatSingleVC : UITableViewDataSource, UITableViewDelegate {
 	
 	func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
 		let cell = self.tableCells![indexPath.row] as! ChatSingleMessageCell
-		print(cell.height())
 		return cell.height()
 	}
 	
@@ -121,6 +125,7 @@ extension ChatSingleVC : UITextFieldDelegate {
 				self.messages = MessageManager.sharedInstance()?.messages(user: self.friend)
 				
 				let cell = ChatSingleMessageCell.create(self.messages!.lastObject as? PFObject)
+				cell.delegate = self
 				self.tableCells.add(cell)
 				
 				self.tableView.reloadData()
@@ -130,5 +135,39 @@ extension ChatSingleVC : UITextFieldDelegate {
 		}
 		
 		return true
+	}
+}
+
+
+extension ChatSingleVC : GetPhotosVCDelegate {
+	func setPhotoSet(obj: PFObject) {
+		print("")
+		
+//		selectedPhotoSet = obj
+//		self.lblPhotoSet.text = obj[DBNames.photoSets_setname] as? String ?? ""
+	}
+	
+	func setImage(img: UIImage) {
+		MessageManager.sharedInstance()?.sendImage(friend!, image: img, callback: { (error) in
+			if error != nil {
+				print(error as Any)
+				return
+			}
+			
+			self.messages = MessageManager.sharedInstance()?.messages(user: self.friend)
+			
+			let cell = ChatSingleMessageCell.create(self.messages!.lastObject as? PFObject)
+			cell.delegate = self
+			self.tableCells.add(cell)
+			
+			self.tableView.reloadData()
+		})
+	}
+}
+
+
+extension ChatSingleVC: MessageCellDelegate {
+	func messageCellFinishedLoadingImage(_ cell: ChatSingleMessageCell!) {
+		self.tableView.reloadData()
 	}
 }

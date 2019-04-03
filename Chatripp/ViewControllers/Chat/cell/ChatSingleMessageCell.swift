@@ -9,6 +9,10 @@
 import UIKit
 import Parse
 
+protocol MessageCellDelegate: NSObjectProtocol {
+	func messageCellFinishedLoadingImage(_ cell: ChatSingleMessageCell!)
+}
+
 class ChatSingleMessageCell: UITableViewCell {
 	
 	var message: PFObject?
@@ -16,7 +20,9 @@ class ChatSingleMessageCell: UITableViewCell {
 	var contentLabel: UITextView?
 	var timeLabel: UILabel?
 	var bubbleImage: UIImageView?
-	var statusIcon: UIImageView?
+	var photoView: PFImageView?
+	
+	public var delegate: MessageCellDelegate?
 	
 	public static func create(_ message: PFObject!) -> ChatSingleMessageCell {
 		let cellIdentifier = "ChatSingleMessageCell"
@@ -52,7 +58,6 @@ class ChatSingleMessageCell: UITableViewCell {
 		
 		self.contentLabel!.text = ""
 		self.timeLabel!.text = ""
-		self.statusIcon!.image = nil
 	}
 	
 	public func height() -> CGFloat {
@@ -68,20 +73,24 @@ class ChatSingleMessageCell: UITableViewCell {
 		self.contentLabel = UITextView()
 		self.bubbleImage = UIImageView()
 		self.timeLabel = UILabel()
-		self.statusIcon = UIImageView()
+		self.photoView = PFImageView()
 		
 		self.contentView.addSubview(self.bubbleImage!)
 		self.contentView.addSubview(self.contentLabel!)
+		self.contentView.addSubview(self.photoView!)
 		self.contentView.addSubview(self.timeLabel!)
-		self.contentView.addSubview(self.statusIcon!)
 	}
 
 	public func setMessage(_ message:PFObject!) {
 		self.message = message
 		
-		self.setTextLabel()
-		self.setTimeLabel();
-		self.setBubble();
+		if MessageManager.isImage(self.message) {
+			self.setPhoto()
+		} else {
+			self.setText()
+			self.setTimeLabel();
+			self.setBubble();
+		}
 		
 		self.setNeedsLayout()
 	}
@@ -97,11 +106,11 @@ class ChatSingleMessageCell: UITableViewCell {
 		return (textView_height <= 45 && (textView_width + delta_x) <= 0.8 * view_width) ? true : false
 	}
 	
-	func setTextLabel() {
-		let max_width = (self.contentView.frame.width * 0.7) as CGFloat
+	func setText() {
+		let maxWidth = (self.contentView.frame.width * 0.7) as CGFloat
 		self.contentLabel!.frame = CGRect(x: CGFloat(0),
 										  y: CGFloat(0),
-										  width: max_width,
+										  width: maxWidth,
 										  height: CGFloat(FLT_MAX))
 		self.contentLabel!.font = UIFont(name: "Helvetica", size: 17.0)
 		self.contentLabel!.backgroundColor = UIColor.clear
@@ -135,7 +144,54 @@ class ChatSingleMessageCell: UITableViewCell {
 		self.contentLabel!.autoresizingMask = autoresizing;
 	}
 	
+	func setPhoto() {
+		photoView?.file = self.message!["image"] as? PFFileObject
+		photoView?.load(inBackground: { (image, error) in
+			if error != nil {
+				print(error as Any)
+				return
+			}
+			
+			let maxWidth = (self.contentView.frame.width * 0.5) as CGFloat
+			
+			let imageWidth: CGFloat! = image?.size.width
+			let imageHeight: CGFloat! = image?.size.height
+			
+			var orgX: CGFloat
+			let orgY: CGFloat = 10
+			let width = (imageWidth >= imageHeight) ? maxWidth : (maxWidth * imageHeight / imageWidth)
+			let height = width * imageHeight / imageWidth
+			var autoresizing: UIView.AutoresizingMask
+			
+			if (MessageManager.fromMe(self.message)) {
+				orgX = self.contentView.frame.width - width - 20
+				autoresizing = UIView.AutoresizingMask.flexibleLeftMargin
+			} else {
+				orgX = 20
+				autoresizing = UIView.AutoresizingMask.flexibleRightMargin
+			}
+			
+			self.photoView!.frame = CGRect(x: orgX,
+										   y: orgY,
+										   width: width,
+										   height: height)
+			self.photoView!.autoresizingMask = autoresizing;
+			
+			self.setTimeLabel();
+			self.setBubble();
+			
+			if self.delegate != nil {
+				DispatchQueue.main.async(execute: {
+					self.delegate?.messageCellFinishedLoadingImage(self)
+				})
+			}
+		})
+	}
+	
 	func setTimeLabel() {
+		let maxWidth = (self.contentView.frame.width * 0.7) as CGFloat
+		let maxHeight = maxWidth
+		
 		self.timeLabel!.frame = CGRect(x: 0, y: 0, width: 52, height: 14)
 		self.timeLabel!.textColor = UIColor.lightGray
 		self.timeLabel!.font = UIFont(name: "Helvetica", size: 12.0)
@@ -151,21 +207,30 @@ class ChatSingleMessageCell: UITableViewCell {
 		
 		//Set position
 		var orgX: CGFloat!
-		var orgY = self.contentLabel!.frame.origin.y + self.contentLabel!.frame.size.height
+		var orgY: CGFloat!
 		
-		if (MessageManager.fromMe(self.message))
-		{
-			orgX = self.contentLabel!.frame.origin.x + self.contentLabel!.frame.size.width - self.timeLabel!.frame.size.width - 20
-		}
-		else
-		{
-			orgX = max(self.contentLabel!.frame.origin.x + self.contentLabel!.frame.size.width - self.timeLabel!.frame.size.width,
-						 self.contentLabel!.frame.origin.x)
+		if (MessageManager.fromMe(self.message)) {
+			if MessageManager.isImage(self.message) {
+				orgX = self.photoView!.frame.origin.x + self.photoView!.frame.size.width - self.timeLabel!.frame.size.width - 20
+				orgY = self.photoView!.frame.origin.y + self.photoView!.frame.size.height - 10
+			} else {
+				orgX = self.contentLabel!.frame.origin.x + self.contentLabel!.frame.size.width - self.timeLabel!.frame.size.width - 20
+				orgY = self.contentLabel!.frame.origin.y + self.contentLabel!.frame.size.height
+			}
+		} else {
+			if MessageManager.isImage(self.message) {
+				orgX = max(self.photoView!.frame.origin.x + self.photoView!.frame.size.width - self.timeLabel!.frame.size.width,
+						   self.photoView!.frame.origin.x)
+				orgY = self.photoView!.frame.origin.y + self.photoView!.frame.size.height - 10
+			} else {
+				orgX = max(self.contentLabel!.frame.origin.x + self.contentLabel!.frame.size.width - self.timeLabel!.frame.size.width,
+						   self.contentLabel!.frame.origin.x)
+				orgY = self.contentLabel!.frame.origin.y + self.contentLabel!.frame.size.height
+			}
 		}
 		
-		if self.isSingleLineCase() {
+		if !MessageManager.isImage(self.message) && self.isSingleLineCase() {
 			orgX = self.contentLabel!.frame.origin.x + self.contentLabel!.frame.size.width - 5
-//			orgY -= 10
 		}
 		
 		self.timeLabel!.frame = CGRect(x: orgX,
@@ -184,22 +249,38 @@ class ChatSingleMessageCell: UITableViewCell {
 		var orgX: CGFloat
 		let orgY = 0 as CGFloat
 		let width: CGFloat
-		let height = self.contentLabel!.frame.size.height + self.timeLabel!.frame.size.height + 8
+		let height: CGFloat
 		
-		if (MessageManager.fromMe(self.message)) {
-			orgX = min(self.contentLabel!.frame.origin.x - marginLeft,
-						   self.contentLabel!.frame.origin.x - 2 * marginLeft)
-			
+		if MessageManager.fromMe(self.message) {
 			self.bubbleImage?.image = UIImage(named:"bubbleMine")?.stretchableImage(withLeftCapWidth: 15, topCapHeight: 14)
-			
-			width = self.contentView.frame.width - orgX - marginRight
+			if MessageManager.isImage(self.message) {
+				orgX = min(self.photoView!.frame.origin.x - marginLeft,
+						   self.photoView!.frame.origin.x - 2 * marginLeft)
+				
+				width = self.contentView.frame.width - orgX - marginRight
+				height = self.photoView!.frame.size.height + self.timeLabel!.frame.size.height + 8
+			} else {
+				orgX = min(self.contentLabel!.frame.origin.x - marginLeft,
+						   self.contentLabel!.frame.origin.x - 2 * marginLeft)
+				
+				width = self.contentView.frame.width - orgX - marginRight
+				height = self.contentLabel!.frame.size.height + self.timeLabel!.frame.size.height + 8
+			}
 		} else {
 			orgX = marginRight
 			self.bubbleImage?.image = UIImage(named: "bubbleSomeone")?.stretchableImage(withLeftCapWidth: 21, topCapHeight: 14)
 			
-			let contentWidth = self.contentLabel!.frame.origin.x + self.contentLabel!.frame.size.width + marginLeft
-			let timeWidth = self.timeLabel!.frame.origin.x + self.timeLabel!.frame.size.width + 2 * marginLeft
-			width = max(contentWidth, timeWidth)
+			if MessageManager.isImage(self.message) {
+				let contentWidth = self.photoView!.frame.origin.x + self.photoView!.frame.size.width + marginLeft
+				let timeWidth = self.timeLabel!.frame.origin.x + self.timeLabel!.frame.size.width + 2 * marginLeft
+				width = max(contentWidth, timeWidth)
+				height = self.photoView!.frame.size.height + self.timeLabel!.frame.size.height + 8
+			} else {
+				let contentWidth = self.contentLabel!.frame.origin.x + self.contentLabel!.frame.size.width + marginLeft
+				let timeWidth = self.timeLabel!.frame.origin.x + self.timeLabel!.frame.size.width + 2 * marginLeft
+				width = max(contentWidth, timeWidth)
+				height = self.contentLabel!.frame.size.height + self.timeLabel!.frame.size.height + 8
+			}
 		}
 		
 		self.bubbleImage?.frame = CGRect(x: orgX,
