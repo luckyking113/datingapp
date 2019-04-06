@@ -7,10 +7,11 @@
 //
 
 import UIKit
+import Parse
 
 class ChatHomeTableViewCell: UITableViewCell {
 
-    @IBOutlet weak var imgAvatar: UIImageView!
+    @IBOutlet weak var imgAvatar: PFImageView!
     @IBOutlet weak var lblName: UILabel!
     @IBOutlet weak var lblLastMsg: UILabel!
     @IBOutlet weak var lblLastTime: UILabel!

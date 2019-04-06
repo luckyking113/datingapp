@@ -7,10 +7,11 @@
 //
 
 import UIKit
+import Parse
 
 class TripHomeTableViewCell: UITableViewCell {
 
-    @IBOutlet weak var imgCity: UIImageView!
+    @IBOutlet weak var imgCity: PFImageView!
     @IBOutlet weak var lblCity: UILabel!
     @IBOutlet weak var lblCountry: UILabel!
     
@@ -18,8 +19,7 @@ class TripHomeTableViewCell: UITableViewCell {
     @IBOutlet weak var lblDateLeave: UILabel!
     @IBOutlet weak var lblDateArrive: UILabel!
     
-    var trip : TripModal!
-    var isNewTrip = true
+    var trip : Trip!
     
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -33,19 +33,25 @@ class TripHomeTableViewCell: UITableViewCell {
         // Configure the view for the selected state
     }
     
-    func setTrip(celltrip : TripModal, newTrip: Bool) {
+    func setTrip(_ trip : Trip) {		
+		let isNew = trip.isNew()
+		
+        self.trip = trip
+        self.lblCity.text = trip.city()!
+        self.lblCountry.text = trip.country()!
+        self.viewSchedule.isHidden = isNew
         
-        self.isNewTrip = newTrip
-        self.trip = celltrip
-        self.imgCity.image = trip.getTripBGImage()
-        self.lblCity.text = trip.city
-        self.lblCountry.text = trip.country
-        self.viewSchedule.isHidden = isNewTrip
-        
-        if !isNewTrip {
-            self.lblDateLeave.text = self.trip.dateLeave?.toString(withFormat: Constants.dateFormatDM)
-            self.lblDateArrive.text = self.trip.dateArrive?.toString(withFormat: Constants.dateFormatDM)
-        }
+        if !isNew {
+			self.lblDateArrive.text = self.trip.arrivingDate()?.toString(withFormat: Constants.dateFormatDM)
+            self.lblDateLeave.text = self.trip.leavingDate()?.toString(withFormat: Constants.dateFormatDM)
+		} else {
+			self.lblDateArrive.text = ""
+			self.lblDateLeave.text = ""
+		}
+		
+		if let landscapeFile = self.trip.landscape() as? PFFileObject {
+			self.imgCity.file = landscapeFile
+			self.imgCity.loadInBackground()
+		}
     }
-
 }

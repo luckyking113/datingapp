@@ -15,13 +15,20 @@ class ProfileEditVC: UIViewController {
     @IBOutlet weak var imgAvatar: PFImageView!
     @IBOutlet weak var txtFirstName: UITextField!
     @IBOutlet weak var txtLastname: UITextField!
+	@IBOutlet weak var txtBirthday: UITextField!
+	@IBOutlet weak var txtNationality: UITextField!
     @IBOutlet weak var txtBio: UITextView!
     @IBOutlet weak var imgCoverPhoto: PFImageView!
     @IBOutlet weak var btnCity: UIButton!
     @IBOutlet weak var txtEmail: UITextField!
 
     var isOpenAvatar = true
-    var locationModal = LocationModal()
+	
+	var city = ""
+	var country = ""
+	var address = ""
+	var lat = ""
+	var lon = ""
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -45,21 +52,23 @@ class ProfileEditVC: UIViewController {
         
         if let profile = UserManager.sharedInstance.profile {
             
-            if let avatar = profile[DBNames.profile_avatar] as? PFFileObject {
+            if let avatar = profile.avatar() as? PFFileObject {
                 self.imgAvatar.file = avatar
                 self.imgAvatar.loadInBackground()
             }
             
-            if let cover = profile[DBNames.profile_coverphoto] as? PFFileObject {
+            if let cover = profile.cover() as? PFFileObject {
                 self.imgCoverPhoto.file = cover
                 self.imgCoverPhoto.loadInBackground()
             }
             
-            self.txtFirstName.text = profile[DBNames.profile_firstname] as? String ?? ""
-            self.txtLastname.text = profile[DBNames.profile_lastname] as? String ?? ""
-            self.txtBio.text = profile[DBNames.profile_bio] as? String ?? ""
-            let location_city = profile[DBNames.profile_city] as? String ?? ""
-            let location_country = profile[DBNames.profile_country] as? String ?? ""
+			self.txtFirstName.text = profile.firstName()
+			self.txtLastname.text = profile.lastName()
+			self.txtBirthday.text = profile.birthday()
+			self.txtNationality.text = profile.nationality()
+			self.txtBio.text = profile.bio()
+			let location_city = profile.city() ?? ""
+			let location_country = profile.country() ?? ""
             
             if !location_city.isEmpty && !location_country.isEmpty {
                 self.btnCity.setTitle("\(location_city) , \(location_country)", for: .normal)
@@ -76,33 +85,27 @@ class ProfileEditVC: UIViewController {
     }
     
     @IBAction func clickSave(_ sender: Any) {
-        
         if let profile = UserManager.sharedInstance.profile {
             
-            profile[DBNames.profile_firstname] = txtFirstName.text
-            profile[DBNames.profile_lastname] = txtLastname.text
-            profile[DBNames.profile_bio] = txtBio.text
-            profile[DBNames.profile_city] = self.btnCity.titleLabel?.text
+			profile.setFirstName(txtFirstName.text!)
+			profile.setLastName(txtLastname.text!)
+			profile.setBirthday(txtBirthday.text!)
+			profile.setNationality(txtNationality.text!)
+            profile.setBio(txtBio.text)
             
             // Address
-            profile[DBNames.profile_city] = self.locationModal.city
-            profile[DBNames.profile_country] = self.locationModal.country
-            profile[DBNames.profile_formatted_address] = self.locationModal.formattedAddress
-            profile[DBNames.profile_latitude] = self.locationModal.lat
-            profile[DBNames.profile_longitude] = self.locationModal.lon
+            profile.setCity(self.city)
+            profile.setCountry(self.country)
+            profile.setAddress(self.address)
+            profile.setLat(self.lat)
+            profile.setLon(self.lon)
             
             if let avatar = imgAvatar.image {
-                if let data = avatar.pngData(){
-                    let file = PFFileObject(name: "avatar", data: data)
-                    profile[DBNames.profile_avatar] = file
-                }
+				profile.setAvatar(avatar)
             }
             
             if let coverPhoto = imgCoverPhoto.image {
-                if let data = coverPhoto.pngData(){
-                    let file = PFFileObject(name: "coverPhoto", data: data)
-                    profile[DBNames.profile_coverphoto] = file
-                }
+				profile.setCover(coverPhoto)
             }
             UserManager.sharedInstance.profile = profile
             
@@ -192,7 +195,12 @@ extension ProfileEditVC : GMSAutocompleteViewControllerDelegate , UITextFieldDel
         print("Place address: \(place.formattedAddress ?? "")")
 //        print("Place attributions: \(place.attributions)")
         
-        locationModal = LocationModal(withPlace: place)
+		self.city = place.addressComponents?.first(where: { $0.type == "locality" })?.name ?? ""
+		self.country = place.addressComponents?.first(where: { $0.type == "country" })?.name ?? ""
+		self.address = place.formattedAddress ?? "'"
+		self.lat = String(place.coordinate.latitude)
+		self.lon = String(place.coordinate.longitude)
+		
         self.btnCity.setTitle(place.formattedAddress, for: .normal)
         dismiss(animated: true, completion: nil)
     }

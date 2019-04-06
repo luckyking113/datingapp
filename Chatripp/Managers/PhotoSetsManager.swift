@@ -24,7 +24,6 @@ public class PhotoSetsManager {
     }
     
     func loadAllPhotoSets() {
-        
         self.getPhotoSetsFromServer() { (success, objs) in
             if success {
                 if let objs = objs{
@@ -34,8 +33,7 @@ public class PhotoSetsManager {
         }
     }
     
-    func getPhotoSetsFromServer( completion: @escaping (_ isSuccess: Bool, _ result: [PFObject]?) -> Void){
-        
+    func getPhotoSetsFromServer( completion: @escaping (_ isSuccess: Bool, _ result: [PFObject]?) -> Void){        
         let query = PFQuery(className: DBNames.photoSets)
         query.order(byAscending: DBNames.photoSets_setname)
         query.findObjectsInBackground { (results, error) in

@@ -40,8 +40,7 @@ class ProfilePhotoTableViewCell: UITableViewCell {
         // Configure the view for the selected state
     }
     
-    func setData(objs: [PFObject]) {
-        
+    func setData(objs: [PFObject]) {        
         self.objs = objs
         self.mCollectionView.reloadData()
         self.lblCity.text = PhotoSetsManager.sharedInstance.getPhotoSetNameWith(objId: objs.first?[DBNames.posts_photoSetId] as? String ?? "")

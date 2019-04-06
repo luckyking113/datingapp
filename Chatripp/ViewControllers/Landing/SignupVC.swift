@@ -135,28 +135,30 @@ extension SignupVC {
 				
 				(UIApplication.shared.delegate as! AppDelegate).configureChannel()
                 
-                let profile = PFObject(className: DBNames.profile)
-                profile[DBNames.profile_userObjId] = user.objectId
-                profile[DBNames.profile_firstname] = firstname
-                profile[DBNames.profile_lastname] = lastname
-                profile[DBNames.profile_settingprivate] = false
-                profile[DBNames.profile_restrictfollow] = false
-                profile.saveInBackground(block: { (success, error) in
-
-                    Helper.hideLoading(target: self)
-                    if success {
-                        
-                        UserManager.sharedInstance.initWithPFUser(pfUser: user)
-                        let appDelegate = UIApplication.shared.delegate as! AppDelegate
-                        appDelegate.setRootWithTabVC()
-                    } else {
-                        
-                        Helper.showAlert(target: self, title: "SignUp Failed", message: error?.localizedDescription ?? "Please try again.")
-                    }
-                })
+                let profile = Profile.create()
+                profile.setUserId(user)
+                profile.setFirstName(firstname)
+                profile.setLastName(lastname)
+                profile.setIsPrivate(false)
+                profile.setIsRestrictFollow(false)
+				profile.save(callback: { (error) in
+					Helper.hideLoading(target: self)
+					
+					if error != nil {
+						print(error!)
+						Helper.showAlert(target: self,
+										 title: "SignUp Failed", message: (error as! Error).localizedDescription )
+						return
+					}
+					
+					UserManager.sharedInstance.initWithPFUser(pfUser: user)
+					let appDelegate = UIApplication.shared.delegate as! AppDelegate
+					appDelegate.setRootWithTabVC()
+				})
             } else {
-                
-                Helper.showAlert(target: self, title: "SignUp Failed", message: error?.localizedDescription ?? "Please try again.")
+                Helper.showAlert(target: self,
+								 title: "SignUp Failed",
+								 message: error?.localizedDescription ?? "Please try again.")
             }
         }
     }

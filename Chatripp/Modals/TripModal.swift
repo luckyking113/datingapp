@@ -9,7 +9,7 @@
 import Foundation
 import Parse
 
-class TripModal {
+class Trip {
     
     var tripObjId = ""
     var city = ""
@@ -24,8 +24,7 @@ class TripModal {
         
     }
     
-    init (withCity: String, country: String, isOriginalTrip : Bool) {
-        
+    init (withCity: String, country: String, isOriginalTrip : Bool) {        
         self.city = withCity
         self.country = country
         self.isOriginalTrip = isOriginalTrip

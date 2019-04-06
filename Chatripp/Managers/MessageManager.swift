@@ -62,15 +62,17 @@ class MessageManager: NSObject {
 		})
 	}
 	
-	public func reloadMessage(user: PFUser!, callback: @escaping ((_ error: Any?) -> Void)) {
+	public func reloadMessage(friend: PFUser!, callback: @escaping ((_ error: Any?) -> Void)) {
 		self.completionHandler = callback
 		
 		let results: NSMutableArray = []
 		
 		let senderQuery = PFQuery(className: "Messages")
 		senderQuery.whereKey("senderId", equalTo:PFUser.current()?.objectId as Any)
+		senderQuery.whereKey("receiverId", equalTo:friend.objectId as Any)
 		
 		let receiverQuery = PFQuery(className: "Messages")
+		receiverQuery.whereKey("senderId", equalTo:friend.objectId as Any)
 		receiverQuery.whereKey("receiverId", equalTo:PFUser.current()?.objectId as Any)
 		
 		let messageQuery = PFQuery.orQuery(withSubqueries: [senderQuery, receiverQuery])
@@ -80,7 +82,7 @@ class MessageManager: NSObject {
 				results.add(message)
 			}
 			
-			self.messages[user.objectId!] = results
+			self.messages[friend.objectId!] = results
 			
 			DispatchQueue.main.async(execute: {
 				self.completionHandler(error)
@@ -98,7 +100,7 @@ class MessageManager: NSObject {
 			return
 		}
 		
-		self.reloadMessage(user: user, callback: self.completionHandler)
+		self.reloadMessage(friend: user, callback: self.completionHandler)
 	}
 	
 	func sendMessage(_ receiver:PFUser, content: String!, callback: @escaping ((_ error: Any?) -> Void)) {

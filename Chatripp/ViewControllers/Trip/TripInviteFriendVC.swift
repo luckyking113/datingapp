@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import Parse
 
 class TripInviteFriendVC: UIViewController {
 
@@ -16,11 +17,11 @@ class TripInviteFriendVC: UIViewController {
     @IBOutlet weak var lblStartDate: UILabel!
     @IBOutlet weak var lblEndDate: UILabel!
     @IBOutlet weak var mTableView: UITableView!
-    @IBOutlet weak var imgBG: UIImageView!
+    @IBOutlet weak var imgBG: PFImageView!
     
-    var trip : TripModal!
-    var allUsers = [UserModal]()
-    var filteredUsers = [UserModal]()
+    var trip : Trip!
+    var allUsers = [Profile]()
+    var filteredUsers = [Profile]()
     
     var filterNations = [String]()
     var filterIsMale = true
@@ -35,6 +36,7 @@ class TripInviteFriendVC: UIViewController {
     }
     
     override func viewWillAppear(_ animated: Bool) {
+		super.viewWillAppear(animated)
         
         if allUsers.count == 0 {
             self.getAllUsers()
@@ -45,16 +47,17 @@ class TripInviteFriendVC: UIViewController {
         return .lightContent
     }
     
-    func setupView() {
-        
-        self.mTableView.dataSource = self
-        self.mTableView.delegate = self
-        self.imgBG.image = trip.getTripBGImage()
-        self.imgBG.addOverlay(opacity: 0.2)
-        self.lblCity.text = trip.city
-        self.lblCountry.text = trip.country
-        self.lblStartDate.text = trip.dateArrive!.toString(withFormat: Constants.dateFormatDM)
-        self.lblEndDate.text = trip.dateLeave!.toString(withFormat: Constants.dateFormatDM)
+    func setupView() {		
+        self.lblCity.text = trip.city()
+        self.lblCountry.text = trip.country()
+        self.lblStartDate.text = trip.arrivingDate()!.toString(withFormat: Constants.dateFormatDM)
+        self.lblEndDate.text = trip.leavingDate()!.toString(withFormat: Constants.dateFormatDM)
+		
+		if let landscapeFile = trip.landscape() as? PFFileObject {
+			self.imgBG.file = landscapeFile
+			self.imgBG.loadInBackground()
+		}
+		self.imgBG.addOverlay(opacity: 0.2)
     }
     
     @IBAction func clickBack(_ sender: Any) {
@@ -127,8 +130,8 @@ extension TripInviteFriendVC : TripFilterFriendVCDelegate {
         self.filteredUsers = self.allUsers.filter({ (user) -> Bool in
             
             if let nations = nationalities , !nations.isEmpty {
-                
-                if nations.contains(where: {$0.compare(user.location.country, options: .caseInsensitive) == .orderedSame}) {
+                if nations.contains(where: {
+					$0.compare(user.country()!, options: .caseInsensitive) == .orderedSame}) {
                     return true
                 } else {
                     return false

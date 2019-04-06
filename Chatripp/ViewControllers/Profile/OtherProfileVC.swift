@@ -31,7 +31,7 @@ class OtherProfileVC: UIViewController {
     var photosGroup = [String:[PFObject]]()
     var photosGroupKeys = [String]()
     var tabType : ProfileTabType = .PHOTOS
-    var opponent = UserModal()
+    var opponent = Profile()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -63,32 +63,28 @@ class OtherProfileVC: UIViewController {
     }
     
     func loadData() {
-        
-        if let avatarURL = URL(string: opponent.avatar_url) {
-            DispatchQueue.main.async {
-                self.imgAvatar.sd_setImage(with: avatarURL, placeholderImage: Helper.thumbnailImage(), options: [], completed: nil)
-            }
+		if let avatarFile = opponent.avatar() {
+			self.imgAvatar.file = (avatarFile as! PFFileObject)
+			imgAvatar.loadInBackground()
+		} else {
+			self.imgAvatar.image = Helper.thumbnailImage()
+		}
+		
+		if let coverFile = opponent.cover() {
+			self.imgCover.file = (coverFile as! PFFileObject)
+			self.imgCover.loadInBackground()
+		} else {
+			self.imgCover.image = Helper.thumbnailImage()
+		}
+		
+        self.lblBio.text = opponent.bio()
+		if !opponent.country()!.isEmpty {
+			self.lblCity.text = "\(opponent.city()!) , \(opponent.country()!)"
         } else {
-            self.imgAvatar.image = Helper.thumbnailImage()
+            self.lblCity.text = "\(opponent.city()!)"
         }
         
-        if let coverURL = URL(string: opponent.coverImg_url) {
-            DispatchQueue.main.async {
-                self.imgCover.sd_setImage(with: coverURL, placeholderImage: Helper.thumbnailImage(), options: [], completed: nil)
-            }
-        } else {
-            self.imgCover.image = Helper.thumbnailImage()
-        }
-            
-        self.lblBio.text = opponent.bio
-        if !opponent.location.country.isEmpty {
-            self.lblCity.text = "\(opponent.location.city) , \(opponent.location.country)"
-        } else {
-            self.lblCity.text = "\(opponent.location.city)"
-        }
-        
-        self.lblName.text = "\(opponent.first_name) \(opponent.last_name)"
-
+        self.lblName.text = opponent.fullName()
         
         self.lblTrips.text = "0"
         self.lblFollowing.text = "0"
@@ -103,8 +99,7 @@ class OtherProfileVC: UIViewController {
         self.lblPhotos.text = "0"
         
         Helper.showLoading(target: self)
-        PostsManager().getPostsFromServer(userObjID: opponent.userObjID) { (success, pfObjs) in
-            
+		PostsManager().getPostsFromServer(userObjID: opponent.userId()!) { (success, pfObjs) in            
             if success {
                 
                 self.photosGroup = PostsManager().getGroupedPost(withPFObjs: pfObjs ?? [])

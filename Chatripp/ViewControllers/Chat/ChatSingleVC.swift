@@ -35,6 +35,12 @@ class ChatSingleVC: UIViewController {
 		(UIApplication.shared.delegate as? AppDelegate)?.chatSingleVC = self
 	}
 	
+	override func viewDidAppear(_ animated: Bool) {
+		super.viewDidAppear(animated)
+		
+		reload()
+	}
+	
 	override func viewDidDisappear(_ animated: Bool) {
 		super.viewDidDisappear(animated)
 		
@@ -47,7 +53,6 @@ class ChatSingleVC: UIViewController {
     
     func setupView() {
 		self.nameLabel.text = String(format: "%@ %@", self.profile!["first_name"] as! String, self.profile!["last_name"] as! String)
-		reload()
     }
     
     @IBAction func clickBack(_ sender: Any) {
@@ -69,7 +74,7 @@ class ChatSingleVC: UIViewController {
 	}
 	
 	public func reload() {
-		MessageManager.sharedInstance()?.reloadMessage(user: friend, callback: { (error) in
+		MessageManager.sharedInstance()?.reloadMessage(friend: friend, callback: { (error) in
 			if error != nil {
 				print(error as Any)
 				return
@@ -84,9 +89,14 @@ class ChatSingleVC: UIViewController {
 				self.tableCells.add(cell)
 			}
 			
-			self.tableView.reloadData()
+			self.reloadAndGotoBottom()
+		})
+	}
+	
+	func reloadAndGotoBottom() {
+		self.tableView.reloadData({
 			if (self.messages.count > 0) {
-				self.tableView.scrollToRow(at: IndexPath(row: self.messages.count-1, section: 0), at: .bottom, animated: true)
+				self.tableView.scrollToRow(at: IndexPath(row: self.messages.count-1, section: 0), at: .none, animated: true)
 			}
 		})
 	}
@@ -160,7 +170,7 @@ extension ChatSingleVC : GetPhotosVCDelegate {
 			cell.delegate = self
 			self.tableCells.add(cell)
 			
-			self.tableView.reloadData()
+			self.reloadAndGotoBottom()
 		})
 	}
 }
@@ -168,6 +178,6 @@ extension ChatSingleVC : GetPhotosVCDelegate {
 
 extension ChatSingleVC: MessageCellDelegate {
 	func messageCellFinishedLoadingImage(_ cell: ChatSingleMessageCell!) {
-		self.tableView.reloadData()
+		self.reloadAndGotoBottom()
 	}
 }

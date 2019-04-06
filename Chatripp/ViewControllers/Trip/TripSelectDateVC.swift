@@ -21,14 +21,16 @@ class TripSelectDateVC: UIViewController {
     @IBOutlet weak var viewLeaving: UIView!
     @IBOutlet weak var imgRectangle: UIImageView!
     
-    @IBOutlet weak var imgBG: UIImageView!
+    @IBOutlet weak var imgBG: PFImageView!
     @IBOutlet weak var lblArriving: UILabel!
     @IBOutlet weak var lblLeaving: UILabel!
     
     let weekdayfont = UIFont.init(name: "SFUIText-Regular", size: 16)!
     let dayfont = UIFont.init(name: "SFUIText-Regular", size: 18)!
     
-    var trip = TripModal()
+    var trip = Trip()
+	var location: Location?
+	
     var isArriving = true
     
     var dateArrive : Date?
@@ -52,10 +54,20 @@ class TripSelectDateVC: UIViewController {
     }
     
     func setupView() {
-        self.lblCity.text = self.trip.city
-        self.lblCountry.text = self.trip.country
-        self.imgBG.image = self.trip.backImgName.count > 0 ? UIImage(named: self.trip.backImgName) : UIImage(named: "bg_thumbnail")
-        showTriagle(isArriving: true)
+		if self.location != nil {
+			self.lblCity.text = self.location?.city()
+			self.lblCountry.text = self.location?.country()
+			
+			self.imgBG.file = self.location?.portrait()
+			self.imgBG.loadInBackground()
+			
+			showTriagle(isArriving: true)
+		} else {
+			self.lblCity.text = self.trip.city()!
+			self.lblCountry.text = self.trip.country()!
+			self.imgBG.image = self.trip.emptyBG()
+			showTriagle(isArriving: true)
+		}
     }
     
     func showTriagle(isArriving: Bool){
@@ -71,8 +83,7 @@ class TripSelectDateVC: UIViewController {
     
     @IBAction func clickAddTrip(_ sender: Any) {
         
-        if dateArrive == nil || dateLeave == nil {
-            
+        if dateArrive == nil || dateLeave == nil {            
             Helper.showAlert(target: self, title: "", message: "Please select arriving and leaving date")
             return
         }
@@ -91,9 +102,16 @@ class TripSelectDateVC: UIViewController {
         newTripObj[DBNames.trips_userObjId] = UserManager.sharedInstance.user?.objectId
         newTripObj[DBNames.trips_arrivingDate] = self.dateArrive
         newTripObj[DBNames.trips_leavingDate] = self.dateLeave
-        newTripObj[DBNames.trips_city] = self.trip.city
-        newTripObj[DBNames.trips_country] = self.trip.country
-        newTripObj[DBNames.trips_isOriginalTrip] = self.trip.isOriginalTrip
+		
+		if (self.location != nil) {
+			newTripObj[DBNames.trips_city] = self.location?.city()
+			newTripObj[DBNames.trips_country] = self.location?.country()
+			newTripObj[DBNames.trips_isOriginalTrip] = true
+		} else {
+			newTripObj[DBNames.trips_city] = self.trip.city
+			newTripObj[DBNames.trips_country] = self.trip.country
+			newTripObj[DBNames.trips_isOriginalTrip] = self.trip.isOriginal()
+		}		
         
         Helper.showLoading(target: self)
         TripsManager.sharedInstance.createNewTrip(obj: newTripObj) { (success, error) in
@@ -104,7 +122,7 @@ class TripSelectDateVC: UIViewController {
                 
             } else {
 //                self.goBackVC()
-                let newTrip = TripModal(with: newTripObj)
+                let newTrip = Trip.create(newTripObj)
                 let inviteVC = self.storyboard?.instantiateViewController(withIdentifier: "TripInviteFriendVC") as! TripInviteFriendVC
                 inviteVC.trip = newTrip
                 self.navigationController?.pushViewController(inviteVC, animated: true)

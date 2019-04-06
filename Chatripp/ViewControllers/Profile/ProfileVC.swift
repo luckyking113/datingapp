@@ -71,19 +71,19 @@ class ProfileVC: UIViewController {
         
         if let profile = UserManager.sharedInstance.profile {
             
-            if let coverPhoto = profile[DBNames.profile_coverphoto] as? PFFileObject {
+            if let coverPhoto = profile.cover() as? PFFileObject {
                 self.imgCover.file = coverPhoto
                 self.imgCover.loadInBackground()
             }
             
-            if let avatar = profile[DBNames.profile_avatar] as? PFFileObject {
+            if let avatar = profile.avatar() as? PFFileObject {
                 self.imgAvatar.file = avatar
                 self.imgAvatar.loadInBackground()
             }
             
-            self.lblBio.text = profile[DBNames.profile_bio] as? String ?? "Unknown"
-            self.lblCity.text = profile[DBNames.profile_city] as? String ?? "Unknown"
-            self.lblName.text = UserManager.sharedInstance.getUserFullname()
+			self.lblBio.text = profile.bio() ?? "Unknown"
+			self.lblCity.text = profile.city() ?? "Unknown"
+            self.lblName.text = UserManager.sharedInstance.profile?.fullName()
         }
         
         

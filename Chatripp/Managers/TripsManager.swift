@@ -17,7 +17,7 @@ public class TripsManager {
         return instance
     }()
     
-    var myTrips = [TripModal]()
+    var myTrips = [Trip]()
     var userObjId = ""
     
     init() {
@@ -36,7 +36,7 @@ public class TripsManager {
                 if let tripObjs = objs {
                     self.myTrips = []
                     for obj in tripObjs {
-                        self.myTrips.append(TripModal(with: obj))
+                        self.myTrips.append(Trip.create(obj))
                     }
                 } else {
                     self.myTrips = []
@@ -66,7 +66,7 @@ public class TripsManager {
         obj.saveInBackground { (success, error) in
             
             if success {
-                self.myTrips.append(TripModal(with: obj))
+                self.myTrips.append(Trip.create(obj))
                 completion(true, nil)
             } else {
                 completion(false, error)
@@ -74,23 +74,21 @@ public class TripsManager {
         }
     }
     
-    func deleteTrip(trip: TripModal , completion : @escaping(_ isSuccess: Bool, _ error: Error?)->Void ){
+    func deleteTrip(trip: Trip , completion : @escaping(_ isSuccess: Bool, _ error: Error?)->Void ){
         
-        if !trip.tripObjId.isEmpty {
+		if !trip.objectId()!.isEmpty {
             
             let query = PFQuery(className: DBNames.trips)
-            query.getObjectInBackground(withId: trip.tripObjId) { (obj, error) in
+			query.getObjectInBackground(withId: trip.objectId()!) { (obj, error) in
                 
                 if error != nil {
                     completion(false,error)
                 } else {
                     if let obj = obj {
                         obj.deleteInBackground(block: { (success, error) in
-                            
                             if success {
-                                
                                 self.myTrips.removeAll(where: { (one) -> Bool in
-                                    return one.tripObjId == trip.tripObjId
+                                    return one.objectId() == trip.objectId()
                                 })
                             }
                             completion(success,error)

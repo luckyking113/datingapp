@@ -16,6 +16,8 @@ class ProfileSettingsVC: UIViewController {
     @IBOutlet weak var lblName: UILabel!
     @IBOutlet weak var switchPrivate: UISwitch!
     @IBOutlet weak var switchRestrict: UISwitch!
+	@IBOutlet weak var bithdayLabel: UILabel!
+	@IBOutlet weak var nationalityLabel: UILabel!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -28,6 +30,8 @@ class ProfileSettingsVC: UIViewController {
     }
  
     override func viewWillAppear(_ animated: Bool) {
+		super.viewWillAppear(animated)
+		
         self.loadData()
     }
     
@@ -37,14 +41,18 @@ class ProfileSettingsVC: UIViewController {
         
         if let profile = UserManager.sharedInstance.profile {
 
-            if let avatar = profile[DBNames.profile_avatar] as? PFFileObject {
+            if let avatar = profile.avatar() as? PFFileObject {
                 self.imgAvatar.file = avatar
                 self.imgAvatar.loadInBackground()
             }
-            self.lblName.text = UserManager.sharedInstance.getUserFullname()
-            self.switchPrivate.isOn = profile[DBNames.profile_settingprivate] as? Bool ?? false
-            self.switchRestrict.isOn = profile[DBNames.profile_restrictfollow] as? Bool ?? false
-        }
+			
+            self.lblName.text = UserManager.sharedInstance.profile?.fullName()
+			self.switchPrivate.isOn = profile.isPrivate()!
+			self.switchRestrict.isOn = profile.isRestrictFollow()!
+			
+			self.bithdayLabel.text = profile.birthday()
+			self.nationalityLabel.text = profile.nationality()
+		}
     }
     
     @IBAction func clickBack(_ sender: Any) {
@@ -60,14 +68,14 @@ class ProfileSettingsVC: UIViewController {
     @IBAction func makePrivate(_ sender: UISwitch) {
         
         if let profile = UserManager.sharedInstance.profile {
-            profile[DBNames.profile_settingprivate] = sender.isOn
+            profile.setIsPrivate(sender.isOn)
             profile.saveInBackground()
         }
     }
     
     @IBAction func restrictFollower(_ sender: UISwitch) {
         if let profile = UserManager.sharedInstance.profile {
-            profile[DBNames.profile_restrictfollow] = sender.isOn
+            profile.setIsRestrictFollow(sender.isOn)
             profile.saveInBackground()
         }
     }

@@ -10,7 +10,7 @@ import Foundation
 import GooglePlaces
 import Parse
 
-class UserModal {
+class Profile {
 
     var objID = ""
     var userObjID = ""

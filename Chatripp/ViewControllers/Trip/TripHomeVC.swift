@@ -8,6 +8,7 @@
 
 import UIKit
 import GooglePlaces
+import Parse
 
 class TripHomeVC: UIViewController {
 
@@ -24,10 +25,11 @@ class TripHomeVC: UIViewController {
     
     var isNewTrip = true
     
-    var trips = [TripModal]()
-    var filteredTrips = [TripModal]()
+    var trips = [Trip]()
+	var locations = [Location]()
+	var filteredLocation = [Location]()
     
-    var upcomingTrips = [TripModal]()
+    var upcomingTrips = [Trip]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -58,17 +60,18 @@ class TripHomeVC: UIViewController {
     }
     
     func initDefaultData() {
-        
-        let newyork = TripModal.init(withCity: "New York", country: "United States", isOriginalTrip: true)
-        let beijing = TripModal.init(withCity: "Beijing", country: "China", isOriginalTrip: true)
-        let tokyo = TripModal.init(withCity: "Tokyo", country: "Japan", isOriginalTrip: true)
-        
-        self.trips = [newyork,beijing,tokyo]
-        self.filteredTrips = self.trips
+		Helper.showLoading(target: self)
+		LocationManager.sharedInstance.load { (results, error) in
+			self.locations = results!
+			self.filteredLocation = results!
+			
+			self.mTableView.reloadData()
+			
+			Helper.hideLoading(target: self)
+		}
     }
     
     func initMyTrips() {
-        
         self.upcomingTrips = TripsManager.sharedInstance.myTrips
         if !self.isNewTrip {
             self.mTableView.reloadData()
@@ -109,9 +112,10 @@ class TripHomeVC: UIViewController {
     
     @IBAction func searchTextChanged(_ sender: UITextField) {
         
-        self.filteredTrips = self.trips.filter({ (trip) -> Bool in
-            
-            if sender.text == "" || trip.city.lowercased().range(of: sender.text!) != nil || trip.country.lowercased().range(of: sender.text!) != nil {
+        self.filteredLocation = self.locations.filter({ (location) -> Bool in
+            let city = location.city()
+			let country = location.country()
+			if sender.text == "" || city!.lowercased().range(of: sender.text!) != nil || country!.lowercased().range(of: sender.text!) != nil {
                 return true
             }
             return false
@@ -125,27 +129,24 @@ extension TripHomeVC : UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         
-        let count = self.isNewTrip ? self.filteredTrips.count : self.upcomingTrips.count
+        let count = self.isNewTrip ? self.filteredLocation.count : self.upcomingTrips.count
         
         return count > 0 ? count : 1
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         
-        let count = self.isNewTrip ? self.filteredTrips.count : self.upcomingTrips.count
+        let count = self.isNewTrip ? self.filteredLocation.count : self.upcomingTrips.count
         
         return count > 0 ? 200 : 200
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        
-        let count = self.isNewTrip ? self.filteredTrips.count : self.upcomingTrips.count
+        let count = self.isNewTrip ? self.filteredLocation.count : self.upcomingTrips.count
         if count > 0 {
-            let tripCell = tableView.dequeueReusableCell(withIdentifier: "TripHomeTableViewCell", for: indexPath) as! TripHomeTableViewCell
-            let trip = self.isNewTrip ? self.filteredTrips[indexPath.row] : self.upcomingTrips[indexPath.row]
-            tripCell.setTrip(celltrip: trip, newTrip: self.isNewTrip)
-            
-            return tripCell
+            let cell = tableView.dequeueReusableCell(withIdentifier: "TripHomeTableViewCell", for: indexPath) as! TripHomeTableViewCell
+			cell.setTrip(self.isNewTrip ? Trip.create(self.filteredLocation[indexPath.row]) : self.upcomingTrips[indexPath.row])			
+            return cell
         } else {
             let noTripCell = tableView.dequeueReusableCell(withIdentifier: "TableCellNoData", for: indexPath) as! TableCellNoData
             noTripCell.imgIcon.image = UIImage(named: "ic_noupcoming_trips")
@@ -158,13 +159,14 @@ extension TripHomeVC : UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        
-        let count = self.isNewTrip ? self.filteredTrips.count : self.upcomingTrips.count
-        
+        let count = self.isNewTrip ? self.filteredLocation.count : self.upcomingTrips.count
         if count > 0 {
-            
             if isNewTrip {
-                self.moveToAddDateVC(trip: self.isNewTrip ? self.filteredTrips[indexPath.row] : self.upcomingTrips[indexPath.row])
+				if self.isNewTrip {
+					self.moveToAddDateVC(self.filteredLocation[indexPath.row])
+				} else {
+					self.moveToAddDateVC(trip: self.upcomingTrips[indexPath.row])
+				}
             } else {
                 // upcomingTrip
                 let inviteVC = self.storyboard?.instantiateViewController(withIdentifier: "TripInviteFriendVC") as! TripInviteFriendVC
@@ -235,12 +237,18 @@ extension TripHomeVC : UITableViewDelegate, UITableViewDataSource {
         }
     }
     
-    func moveToAddDateVC( trip : TripModal) {
+    func moveToAddDateVC(trip : Trip) {
         
         let addTripVC = self.storyboard?.instantiateViewController(withIdentifier: "TripSelectDateVC") as! TripSelectDateVC
         addTripVC.trip = trip
         self.navigationController?.pushViewController(addTripVC, animated: true)
     }
+	
+	func moveToAddDateVC(_ location : Location) {
+		let viewController = self.storyboard?.instantiateViewController(withIdentifier: "TripSelectDateVC") as! TripSelectDateVC
+		viewController.location = location
+		self.navigationController?.pushViewController(viewController, animated: true)
+	}
 }
 
 extension TripHomeVC : GMSAutocompleteViewControllerDelegate , UITextFieldDelegate{
@@ -250,10 +258,14 @@ extension TripHomeVC : GMSAutocompleteViewControllerDelegate , UITextFieldDelega
         print("Place address: \(place.formattedAddress ?? "")")
 //        print("Place attributions: \(place.attributions)")
         
-        let locationModal = LocationModal(withPlace: place)
-        let trip = TripModal(withCity: locationModal.city, country: locationModal.country, isOriginalTrip : false)
+		let city = place.addressComponents?.first(where: { $0.type == "locality" })?.name ?? ""
+		let country = place.addressComponents?.first(where: { $0.type == "country" })?.name ?? ""
+		
+		let trip = Trip()
+		trip.setCity(city)
+		trip.setCountry(country)
+		trip.setIsOriginal(false)
         self.moveToAddDateVC(trip: trip)
-//        self.btnWhereTo.setTitle(place.formattedAddress, for: .normal)
 
         dismiss(animated: true, completion: nil)
     }

@@ -19,8 +19,8 @@ public class UserManager {
     }()
 
     var user : PFUser?
-    var profile : PFObject?
-    var allUsers : [UserModal] = []
+    var profile : Profile?
+    var allUsers : [Profile] = []
     
     init() {
         
@@ -48,14 +48,12 @@ public class UserManager {
     }
     
     func loadProfile(user : PFUser, _ completion : (() -> Void)?) {
-     
-        let query = PFQuery(className: DBNames.profile)
-        query.whereKey(DBNames.profile_userObjId, equalTo: user.objectId!)
+        let query = PFQuery(className: Profile.className)
+        query.whereKey(Profile.userId, equalTo: user.objectId!)
         query.limit = 1
         query.getFirstObjectInBackground { (obj, error) in
-            
             if let obj = obj {
-                self.profile = obj
+                self.profile = Profile.create(obj)
             }
             
             if (completion != nil) {
@@ -63,36 +61,20 @@ public class UserManager {
             }
         }
     }
-    
-    func getUserFullname() -> String {
-        if profile == nil {
-            return ""
-        }
-        let firstName = profile![DBNames.profile_firstname] as? String ?? ""
-        let lastName  = profile![DBNames.profile_lastname] as? String ?? ""
-        return "\(firstName) \(lastName)"
-    }
-    
+	
     func saveProfile(completion: @escaping (_ isSuccess: Bool, _ error: Error?) -> Void) {
-
         if self.profile != nil{
-            self.profile!.saveInBackground { (success, error) in
+            self.profile?.object.saveInBackground { (success, error) in
                 completion(success, error)
             }
         } else {
             completion(false, nil)
         }
     }
-    
-    func getUserLocation() -> LocationModal {
-        
-        return profile == nil ? LocationModal() : LocationModal(withPFObj: self.profile!)
-    }
 
-    func getAllUsers(completion: @escaping (_ isSuccess: Bool, _ result: [UserModal]? ) -> Void) {
-        
-        let query = PFQuery(className: DBNames.profile)
-        query.whereKey(DBNames.profile_userObjId, notEqualTo: self.user!.objectId!)
+    func getAllUsers(completion: @escaping (_ isSuccess: Bool, _ result: [Profile]? ) -> Void) {
+        let query = PFQuery(className: Profile.className)
+        query.whereKey(Profile.userId, notEqualTo: self.user!.objectId!)
         query.limit = 100
         query.findObjectsInBackground { (objs, error) in
             
@@ -102,9 +84,9 @@ public class UserManager {
             } else {
                 if let objs = objs {
                     
-                    var users : [UserModal] = []
+                    var users : [Profile] = []
                     for obj in objs {
-                        users.append(UserModal(with: obj))
+                        users.append(Profile.create(obj))
                     }
                     completion(true, users)
                 } else {

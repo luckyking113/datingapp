@@ -145,52 +145,49 @@ class ChatSingleMessageCell: UITableViewCell {
 	}
 	
 	func setPhoto() {
-		photoView?.file = self.message!["image"] as? PFFileObject
-		photoView?.load(inBackground: { (image, error) in
+		self.photoView?.file = self.message!["image"] as? PFFileObject
+		self.photoView?.load(inBackground: { (image, error) in
 			if error != nil {
 				print(error as Any)
 				return
 			}
 			
-			let maxWidth = (self.contentView.frame.width * 0.5) as CGFloat
-			
-			let imageWidth: CGFloat! = image?.size.width
-			let imageHeight: CGFloat! = image?.size.height
-			
-			var orgX: CGFloat
-			let orgY: CGFloat = 10
-			let width = (imageWidth >= imageHeight) ? maxWidth : (maxWidth * imageHeight / imageWidth)
-			let height = width * imageHeight / imageWidth
-			var autoresizing: UIView.AutoresizingMask
-			
-			if (MessageManager.fromMe(self.message)) {
-				orgX = self.contentView.frame.width - width - 20
-				autoresizing = UIView.AutoresizingMask.flexibleLeftMargin
-			} else {
-				orgX = 20
-				autoresizing = UIView.AutoresizingMask.flexibleRightMargin
-			}
-			
-			self.photoView!.frame = CGRect(x: orgX,
-										   y: orgY,
-										   width: width,
-										   height: height)
-			self.photoView!.autoresizingMask = autoresizing;
-			
-			self.setTimeLabel();
-			self.setBubble();
-			
-			if self.delegate != nil {
-				DispatchQueue.main.async(execute: {
-					self.delegate?.messageCellFinishedLoadingImage(self)
-				})
-			}
+			DispatchQueue.main.async(execute: {
+				let maxWidth = (self.contentView.frame.width * 0.7) as CGFloat
+				
+				let imageWidth: CGFloat! = image?.size.width
+				let imageHeight: CGFloat! = image?.size.height
+				
+				var orgX: CGFloat
+				let orgY: CGFloat = 10
+				let width = (imageWidth >= imageHeight) ? maxWidth : (maxWidth * imageWidth / imageHeight)
+				let height = width * imageHeight / imageWidth
+				var autoresizing: UIView.AutoresizingMask
+				
+				if (MessageManager.fromMe(self.message)) {
+					orgX = self.contentView.frame.width - width - 20
+					autoresizing = UIView.AutoresizingMask.flexibleLeftMargin
+				} else {
+					orgX = 20
+					autoresizing = UIView.AutoresizingMask.flexibleRightMargin
+				}
+				
+				self.photoView!.frame = CGRect(x: orgX,
+											   y: orgY,
+											   width: width,
+											   height: height)
+				self.photoView!.autoresizingMask = autoresizing;
+				
+				self.setTimeLabel();
+				self.setBubble();
+				
+				self.delegate?.messageCellFinishedLoadingImage(self)
+			})
 		})
 	}
 	
 	func setTimeLabel() {
 		let maxWidth = (self.contentView.frame.width * 0.7) as CGFloat
-		let maxHeight = maxWidth
 		
 		self.timeLabel!.frame = CGRect(x: 0, y: 0, width: 52, height: 14)
 		self.timeLabel!.textColor = UIColor.lightGray
@@ -212,7 +209,7 @@ class ChatSingleMessageCell: UITableViewCell {
 		if (MessageManager.fromMe(self.message)) {
 			if MessageManager.isImage(self.message) {
 				orgX = self.photoView!.frame.origin.x + self.photoView!.frame.size.width - self.timeLabel!.frame.size.width - 20
-				orgY = self.photoView!.frame.origin.y + self.photoView!.frame.size.height - 10
+				orgY = self.photoView!.frame.origin.y + self.photoView!.frame.size.height - self.timeLabel!.frame.height
 			} else {
 				orgX = self.contentLabel!.frame.origin.x + self.contentLabel!.frame.size.width - self.timeLabel!.frame.size.width - 20
 				orgY = self.contentLabel!.frame.origin.y + self.contentLabel!.frame.size.height
@@ -221,7 +218,7 @@ class ChatSingleMessageCell: UITableViewCell {
 			if MessageManager.isImage(self.message) {
 				orgX = max(self.photoView!.frame.origin.x + self.photoView!.frame.size.width - self.timeLabel!.frame.size.width,
 						   self.photoView!.frame.origin.x)
-				orgY = self.photoView!.frame.origin.y + self.photoView!.frame.size.height - 10
+				orgY = self.photoView!.frame.origin.y + self.photoView!.frame.size.height - self.timeLabel!.frame.height
 			} else {
 				orgX = max(self.contentLabel!.frame.origin.x + self.contentLabel!.frame.size.width - self.timeLabel!.frame.size.width,
 						   self.contentLabel!.frame.origin.x)
